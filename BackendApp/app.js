@@ -13,7 +13,9 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use('/uploads/images', express.static(path.join('uploads', 'images')))
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
+app.use( express.static(path.join('public')));
+
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,12 +31,17 @@ app.use((req, res, next) => {
 })
 
 app.use('/api/places', placesRoutes);
-app.use('/api/users', usersRoutes)
+app.use('/api/users', usersRoutes);
 
 app.use((req, res, next) => {
-    const error = new HttpError('Could not find this route', 404);
-    throw error;
+    res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
+
+
+// app.use((req, res, next) => {
+//     const error = new HttpError('Could not find this route', 404);
+//     throw error;
+// });
 
 app.use((error, req, res, next) => {
     if (req.file) {
@@ -51,9 +58,9 @@ app.use((error, req, res, next) => {
 
 
 mongoose
-    .connect('mongodb+srv://RM:BTSleader@cluster0.vlfvq.mongodb.net/mern?retryWrites=true&w=majority')
+    .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vlfvq.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`)
     .then(() => {
-        app.listen(5000);
+        app.listen(process.env.PORT || 5000);
     })
     .catch(err => {
         console.log(err);
